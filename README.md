@@ -12,6 +12,7 @@ That last clause is the contribution. Everything before it is engineering.
 ## Quickstart
 
 ```bash
+python3 -m venv .venv && source .venv/bin/activate   # Debian/Kali: required, PEP 668
 pip install -e ".[dev]"            # or: make setup
 make test                          # all unit tests
 python -m vrgrid.run --seq 08 --schedule 5/10/20/40
