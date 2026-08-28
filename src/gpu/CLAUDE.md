@@ -15,6 +15,12 @@
   cells against a 745,000-cell headline. `allocators.annulus_index()` bands
   each ring into four rectangles; it returns -1 for the hole, and a -1 read as
   an index dumps the far field into cell 0.
+- **Scatter has two paths, and they must stay bit-identical.** `scatter_sorted`
+  (default, scratch sized by points) and `scatter_atomic` (dense accumulator,
+  the literal reading of master v4 §3.5). `tests/test_kernels.py` asserts they
+  agree field-for-field; if they diverge, the optimisation is the bug.
+- **`annulus_index()` returns -1 for the hole.** Scatter drops those. A -1 used
+  as an index piles the far field into cell 0 and still looks plausible.
 - **No OptiX / RT cores.** Unsupported on Jetson; visibility cleanup is already
   O(1) per cell by range-image comparison. Future-work line only.
 
