@@ -8,7 +8,13 @@
 - **No allocation in the frame loop.** Grid arrays, refinement pool (512 × 16
   × 12 B = 98 KB), transient layer and tracked-object list are all preallocated
   at startup. One allocation in the loop makes the memory claim false.
-- **Timing is median and p95, not mean.** A 10 Hz claim is about the tail.
+- **Timing is p50 and p99, not mean**, and percentiles are nearest-rank —
+  numpy's default interpolation invents a latency no frame ever took and
+  rounds the tail down. A 10 Hz claim is about the tail.
+- **Rings are annuli, not squares.** Four full squares would cost 910,000
+  cells against a 745,000-cell headline. `allocators.annulus_index()` bands
+  each ring into four rectangles; it returns -1 for the hole, and a -1 read as
+  an index dumps the far field into cell 0.
 - **No OptiX / RT cores.** Unsupported on Jetson; visibility cleanup is already
   O(1) per cell by range-image comparison. Future-work line only.
 
