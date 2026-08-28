@@ -161,9 +161,26 @@ For the default schedule `k = (1, 2, 4, 8)`; for the ablation `k = (1, 2, 10)`.
 
 The ring-`L` lattice is **exactly** the direct lattice of cell size `k_L c₀`. Therefore the ring cells form a partition of the plane: every point lands in exactly one cell, never zero, never two. **There is no tolerance to tune, no epsilon, and no boundary case.**
 
-Contrast with the naive implementation, computing `⌊x/0.20⌋` and `⌊x/0.40⌋` independently in IEEE-754. Because 0.2 and 0.4 are not exactly representable in binary, those two lattices drift apart, and near a boundary you get points that fall in both or neither.
+Contrast with the naive implementation, computing `⌊x/c_L⌋` independently per ring in IEEE-754 from a decimal literal. The ring lattice is then built on `fl(c_L)`, a different real number from the `k_L·fl(c₀)` that `k_L` fine cells actually span, so the two lattices drift apart and near a boundary you get points that fall in both cells or in neither.
+
+> **Correction, 28 Aug — Aakash.** *This paragraph previously named `⌊x/0.20⌋` and `⌊x/0.40⌋` as the counterexample. Those are exactly the two values where the naive code is **accidentally correct**, so as written the section was arguing its case from the one family of examples that does not support it. The claim is right; the numbers were wrong. Corrected here and in §2.4(b). Nothing about (8), (9), the theorem or its proof changes.*
+
+**Where the drift actually bites — and why the default schedule hides it.** `fl(c₀)` = 3602879701896397/2⁵⁶, slightly greater than 1/20. Multiplying a double by 2^m is exact, so for `k = 2^m` the quantity `k·fl(c₀)` is representable and `fl(c_L)` **is** that same double: the naive lattice coincides with the derived one exactly. The default schedule's ratios are 1, 2, 4, 8 — all powers of two — so a naive implementation passes every test you run against `5/10/20/40` and is genuinely bit-identical there.
+
+It fails on the ablation. For `k = 10`, `k·fl(c₀)` = 0.5000000000000000277… is **not** representable and rounds to exactly 0.5, so a ring cell of the naive lattice is a hair narrower than the ten fine cells it is supposed to contain. The double 0.5 lies in fine cell 9 — ring cell 0 — while the naive lattice calls it ring cell 1:
+
+```
+x = 0.5, k = 10:   ⌊i_fine(x)/k⌋ = ⌊9/10⌋   = 0     ← derived, and correct
+                   ⌊x / (k·c₀)⌋  = ⌊0.5/0.5⌋ = 1     ← naive, off by one
+```
+
+This is not one unlucky value. It is **every** positive boundary of the naive lattice: 4000 of 4000 out to 200 m, and the same for `k = 5` and `k = 20`. The failure is one-sided — the naive cell is narrower than the fine cells it should contain, so on the negative side the flooring absorbs the shortfall and the two agree.
+
+Note *where* it is not: at ±4 ulps around each of those 4000 boundaries, 72,009 probes in total, the only disagreements are at the boundary doubles themselves — 4000 of them, zero in the neighbourhood. The defect has measure zero. **That is what makes it dangerous, not what makes it safe.** No amount of uniform random sampling will find it, which is why the test specified in §2.4(b) has to compare against exact arithmetic rather than against a second float computation, and why this went unnoticed long enough to reach a frozen document. A LiDAR return at exactly 0.5 m, 1.0 m or 1.5 m is not exotic. Recorded as `test_direct_float_lattice_disagrees_at_ring_boundaries`.
 
 **Why powers of two are convenient but not required.** For `k = 2^m`, equation (9) is a bit-shift `i_fine >> m`. For any other integer (e.g. `k=10` in the ablation schedule) it is an integer divide. Both are exact. The validator must therefore check **integer ratio**, not power-of-two.
+
+Note that the power-of-two case is doubly special: it is also the case where the float shortcut is safe. That is precisely why equation (9) is not optional. Written the naive way, this project would ship a lattice that is provably correct on the schedule it was developed against and silently off by one cell on the schedule it is compared to — and the ablation is where the memory claim is made.
 
 ### 2.4 Map shifting — O(perimeter), not O(area)
 
@@ -177,7 +194,17 @@ Shifting by one cell increments the offset and clears only the newly exposed str
 
 **Constraint:** the map origin must move in whole **coarsest**-cell steps (40 cm), otherwise every ring boundary shifts by a fraction and you must resample — which is precisely the "data loss during projection" the brief warns about. Expected side effect: the nominal 25 m ring boundary wobbles by up to 40 cm. That is correct behaviour, not a bug.
 
-**Unit test.** Generate 10⁶ random points. Assert (a) each maps to exactly one cell per ring; (b) `i_L` computed by (9) equals `⌊x/(k_L c₀)⌋` computed directly, for all rings, bit-exact; (c) shifting the map by +1 then −1 cell restores every cell value identically.
+**Unit test.** Generate 10⁶ random points, seeded — a CI-blocking gate must fail reproducibly or not at all. Assert:
+
+**(a)** each point maps to exactly one cell per ring. Anchor existence at the index actually returned: `i·k ≤ i_fine < (i+1)·k`, then assert that neither neighbour also contains it. Counting how many of `{i−1, i, i+1}` contain the point is **not** sufficient — the cells are disjoint by construction, so that count is 1 even when `i` is off by one, and a truncating implementation passes.
+
+**(b)** `i_L` computed by (9) equals the true index of the size-`k_L c₀` lattice, evaluated in **exact rational arithmetic** — `⌊Fraction(x) / (Fraction(c₀)·k_L)⌋` — not as `⌊x/(k_L c₀)⌋` in floating point. The theorem in §2.2 is a statement about reals, and `k_L c₀` is itself a rounded double; evaluating the right-hand side in floats measures that rounding, not the theorem, and for `k = 10` it is false at every boundary (§2.3). Exact arithmetic is slow, so run it on a 2·10⁴ subsample and keep the full 10⁶ for (a), which is pure integer work.
+
+**(c)** shifting the map by +1 then −1 cell restores every cell value identically.
+
+**(d)** run (a) and (b) against **both** frozen schedules. `5/10/20/40` is all powers of two and cannot catch a lattice bug that only appears at non-power-of-two ratios; `5/10/50` is what exercises `k = 10`.
+
+*(b) and (d) revised 28 Aug — see the correction in §2.3.*
 
 ---
 
