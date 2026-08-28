@@ -1,0 +1,51 @@
+# FROZEN before any schedule comparison. Master v4 §3.8, flaw E6.
+#
+# If these move between runs you are comparing tuning effort, not schedules.
+# Tune on sequence 07, report on 08 -- never tune and report on the same one.
+#
+# Every value here is read at startup. Nothing in src/ may hardcode a threshold
+# inline; if you find one, that is a bug, not a shortcut.
+
+frozen: true
+frozen_on: null        # set to the commit sha at the Day-0 freeze
+tuning_sequence: "07"
+reporting_sequence: "08"
+
+# --- traversability bitfield (math §7.1), 0 = traversable -------------------
+traversability:
+  h_vehicle_m: 1.8         # bit 0  clearance
+  theta_max_deg: 20.0      # bit 1  slope, compared as tan(theta_max)
+  s_max_m: 0.15            # bit 2  step, max |z_c - z_nbr| over 4-neighbours
+  sigma2_max_m2: 0.0025    # bit 3  roughness, (5 cm)^2
+  n_min: 3                 # bit 5  confidence -- below this, fail safe
+  drivable_classes: [road, parking, sidewalk, other-ground, terrain]  # bit 4
+
+# --- occupancy ---------------------------------------------------------------
+occupancy:
+  # Unknown is decided by observation count, NOT by log-odds near zero.
+  unknown_below_obs: 1
+  log_odds_hit: 4
+  log_odds_miss: -2
+  log_odds_clamp: [-64, 63]
+
+# --- sensor (HDL-64E on KITTI) ----------------------------------------------
+sensor:
+  height_m: 1.73
+  d_theta_deg: 0.2
+  d_phi_deg: 0.427
+  phi_min_deg: -24.8
+  blind_cone_m: 3.74       # h / tan|phi_min|. Unknown, never free. 11% of Ring 0.
+
+# --- visibility cleanup (math §10.4) ----------------------------------------
+visibility:
+  # Never clear a cell that has a return in the current scan. Without this
+  # guard the cleanup eats fences, poles and sign posts within a few frames.
+  protect_current_returns: true
+  range_tolerance_m: 0.30
+  frames_to_clear: 3
+
+# --- refinement pool (master v4 §3.4) ---------------------------------------
+refinement_pool:
+  blocks: 512
+  cells_per_block: 16      # 512 * 16 * 12 B = 98 KB, fixed
+  evict_by: [closeness, dynamism, time_to_collision]

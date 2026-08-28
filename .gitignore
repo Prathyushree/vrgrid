@@ -1,0 +1,35 @@
+# dataset -- SemanticKITTI 00/07/08 is ~40 GB, never commit it
+data/*
+!data/README.md
+*.bin
+*.label
+*.pcd
+*.ply
+
+# derived artefacts
+reference_maps/
+runs/
+*.rrd
+results/*.csv
+results/*.png
+
+# model checkpoints
+*.pth
+*.ckpt
+*.onnx
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# editors / os
+.vscode/
+.idea/
+.DS_Store

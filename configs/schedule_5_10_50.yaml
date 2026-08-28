@@ -1,0 +1,22 @@
+# Ablation ring schedule. Master v4 §3.1.
+# 50 cm is legal here because 50/10 = 5 is an integer. It was only broken next
+# to 20 cm (50/20 = 2.5). The requirement is integer ratios, not powers of two.
+name: "5_10_50"   # quoted: YAML reads 5_10_50 as the integer 51050
+base_cell_m: 0.05
+
+rings:
+  - {ring: 0, half_width_m: 10,  cell_m: 0.05, cells: 160000, s_az_cm: 3.5}
+  - {ring: 1, half_width_m: 25,  cell_m: 0.10, cells: 210000, s_az_cm: 8.7}
+  - {ring: 2, half_width_m: 100, cell_m: 0.50, cells: 150000, s_az_cm: 34.9}
+
+total_cells: 520000   # 6.24 MB at 12 B/cell, 30.8x vs uniform 5 cm
+
+vertical_extent_m: [-2.0, 6.0]
+hysteresis_eps: 0.1
+
+anisotropy:
+  kappa_forward: 1.0
+  kappa_side: 0.5
+  v_ref_ms: 15.0
+  rear_stretch: 1.0
+  rear_floor_cell_m: 0.50

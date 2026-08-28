@@ -1,0 +1,24 @@
+# Directory ownership is the main integration defence on this project: with
+# three devs and eight days, structuring the repo so two people rarely touch
+# the same file is cheaper insurance than any branching model.
+#
+# TODO Day 0: replace the placeholder handles below with real GitHub usernames.
+# A handle that does not exist fails silently — CODEOWNERS stops matching and
+# nobody gets requested. Verify by opening one PR and checking the reviewer.
+
+# include/vrgrid/ is the only genuinely shared surface. Frozen in the first two
+# hours of Day 0 and treated as immutable. Any change needs all three devs.
+/include/vrgrid/    @aakash-handle @Stxtics03 @jp-handle
+
+/src/grid/          @aakash-handle
+/src/eval/          @aakash-handle
+/src/gpu/           @Stxtics03
+/src/perception/    @jp-handle
+/dashboard/         @jp-handle
+
+# Configs are frozen before the schedule comparison — changing one after that
+# invalidates the ablation, so it gets the same three-way review.
+/configs/           @aakash-handle @Stxtics03 @jp-handle
+
+# Research modules. Srinivas, Hriday and Pratyushi append findings here.
+/docs/research-log.md  @srinivas-handle @hriday-handle @pratyushi-handle
