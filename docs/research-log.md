@@ -31,3 +31,9 @@ Format:
 **Finding:** Validated the 6-condition traversability bitfield against SALON (Sivaprakasam et al., ICRA 2025) and EVORA (Cai et al., IEEE T-RO). Confirmed that geometry must decide while semantics filters (e.g. potholes on drivable classes), and evidential confidence (`TRAV_CONFIDENCE`) must enforce a strict fail-safe against blind areas. Synthesized the one-sentence defence against DOGMa particle grids (Nuss et al. 2018): DOGMa requires millions of particles and tens of GB/s bandwidth vs our deterministic $O(1)$ range-image visibility cleanup under 8.94 MB. Extracted baseline multi-resolution metrics from RoadRunner M&M (Patel et al., RA-L 2024), establishing our 21.5× memory compression vs uniform 2.5D and 286× vs dense 3D voxels.
 **Source:** SALON (ICRA 2025); EVORA (IEEE T-RO); RoadRunner M&M (RA-L 2024); `docs/traversability-and-baselines.md`
 **So what:** Solidifies the theoretical ground for Section 3 (Traversability) and Section 5 (Experimental Baseline Comparison Table) of the final report.
+
+## 2026-09-02 — Pratyushi
+**Module:** R3 (Traversability, Evaluation & Novelty Claim)
+**Finding:** Drafted and delivered publication-grade Sections for the final SIH26053 submission: Section 2 (Related Work covering foveated clipmaps, 2.5D elevation fields, and decision-sensitive abstractions) and Section 4 (Decision-Theoretic Evaluation covering Plan Regret $R(S)$, Coarsening Ratio $\rho$, and Dynamic Removal $F$-score). Verified all 12 literature citations against peer-reviewed proceedings (ICRA, RA-L, IROS, TOG, IJRR, SIGGRAPH).
+**Source:** `docs/draft-report-sections.md`
+**So what:** Fulfills the Days 5–6 writing deliverable for Track γ. Ready for direct inclusion in the final technical report and submission slide deck.
