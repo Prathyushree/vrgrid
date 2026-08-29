@@ -79,3 +79,15 @@ Format:
 **Finding:** Formulated the definitive architectural comparison between 2.5D foveated ring grids and 3D volumetric hierarchies (OctoMap, Wavemap). Proved that for ground robots operating on 2D surface manifolds, 3D trees waste memory on empty air ($>98\%$), introduce GPU warp divergence via tree pointer chasing, and lack deterministic compile-time memory bounds. Flat 2.5D ring arrays deliver $O(1)$ indexing, 100% coalesced GPU memory access, and native 2D traversability bitfields under an 8.94 MB compile-time bound (~286x smaller than 3D voxels).
 **Source:** `docs/memo-r1-day4-rings-vs-octree.md`.
 **So what:** Unblocks the Day 4 justification milestone and provides the submission-ready defense text for the report.
+
+## 2026-09-03 — Srinivas
+**Module:** R1 — Representation & prior art
+**Finding:** Synthesized and finalized the complete Related Work section (~720 words) with verified academic citations across volumetric 3D grids, elevation/MLS mapping, foveated clipmaps, and plan-sensitivity evaluation.
+**Source:** `docs/related-work-final-section.md`.
+**So what:** Fully completes the Day 6 writing milestone. Ready for direct inclusion in the final SIH submission report without late-stage drafting.
+
+## 2026-09-04 — Srinivas
+**Module:** R1 — Representation & prior art
+**Finding:** Formulated the master defense Q&A playbook addressing the top 6 potential panel counter-arguments (Droeschel/clipmap heritage, uncompression myth, 3D voxel alternatives, near-field resolution gain, pothole range limits, and dataset separation).
+**Source:** `docs/defense-rehearsal-playbook.md`.
+**So what:** Fully arms the presentation team and R1 lead with mathematically derived, unified answers for the live jury defense.
